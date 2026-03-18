@@ -3,7 +3,7 @@ import { auth, checkRole } from "../../middlewares/auth.middleware.js";
 import { errorRes, successRes } from "../../utils/response.js";
 import { ROLE } from "../../enums/user.enum.js";
 import { upload } from "../../middlewares/multer.middleware.js";
-import { uploadGallery, uploadImage } from "./user.service.js";
+import { logoutService, uploadGallery, uploadImage } from "./user.service.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { imageSchema } from "../../schemas/file.schema.js";
 
@@ -47,3 +47,13 @@ userRouter.post(
     }
   },
 );
+
+userRouter.post("/logout", auth, async (req, res) => {
+  try {
+    const { flag } = req.body;
+    await logoutService({ user: req.user, flag });
+    successRes({ res, message: "Logout successfully" });
+  } catch (err) {
+    errorRes({ res, message: err.message, status: err.cause?.status || 400 });
+  }
+});

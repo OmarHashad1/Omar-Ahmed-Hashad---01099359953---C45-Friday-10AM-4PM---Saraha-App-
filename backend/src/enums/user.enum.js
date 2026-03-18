@@ -12,3 +12,8 @@ export const PROVIDER = {
   system: 0,
   google: 1,
 };
+
+export const LOGOUT_FLAG={
+  all:"all",
+  device:"device"
+}

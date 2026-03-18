@@ -1,7 +1,7 @@
 import { userModel } from "../../models/user/user.model.js";
 import fs from "fs/promises";
 import { resolve } from "path";
-
+import { LOGOUT_FLAG } from "../../enums/user.enum.js";
 
 export const uploadImage = async ({ user, path }) => {
   if (user.picture) {
@@ -22,4 +22,11 @@ export const uploadGallery = async ({ user, paths }) => {
       $addToSet: { galleries: paths },
     },
   );
+};
+
+export const logoutService = async ({ user, flag = LOGOUT_FLAG.all }) => {
+  if (flag == "all") {
+    user.credentialChangedAt = Date.now();
+    user.save();
+  }
 };

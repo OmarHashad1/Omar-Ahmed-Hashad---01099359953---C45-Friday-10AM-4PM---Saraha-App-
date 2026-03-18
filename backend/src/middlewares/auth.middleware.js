@@ -3,7 +3,6 @@ import { errorRes } from "../utils/response.js";
 
 export const auth = async (req, res, next) => {
   try {
-    console.log(req.body)
     const { authorization } = req.headers;
     const user = await decodeToken({
       token: authorization,
@@ -11,6 +10,13 @@ export const auth = async (req, res, next) => {
     });
     if (!user) {
       errorRes({ res, message: "user not found" });
+    }
+
+    console.log(user.credentialChangedAt);
+    console.log(user);
+
+    if (user.credentialChangedAt >= authorization.iat * 1000) {
+      throw new Error("Invalid token (Session expired)");
     }
     req.user = user;
     next();
