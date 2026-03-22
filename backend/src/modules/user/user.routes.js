@@ -6,17 +6,13 @@ import { upload } from "../../middlewares/multer.middleware.js";
 import { logoutService, uploadGallery, uploadImage } from "./user.service.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { imageSchema } from "../../schemas/file.schema.js";
+import { logoutSchema } from "../../schemas/auth.schema.js";
 
 export const userRouter = new Router();
 
-userRouter.get(
-  "/profile",
-  auth,
-  checkRole([ROLE.admin, ROLE.user]),
-  (req, res) => {
-    successRes({ res, data: req.user });
-  },
-);
+userRouter.get("/profile", auth, (req, res) => {
+  successRes({ res, data: req.user });
+});
 
 userRouter.post(
   "/profile/image",
@@ -48,12 +44,24 @@ userRouter.post(
   },
 );
 
-userRouter.post("/logout", auth, async (req, res) => {
+userRouter.post("/logout", auth, validate(logoutSchema), async (req, res) => {
   try {
     const { flag } = req.body;
-    await logoutService({ user: req.user, flag });
+    await logoutService({
+      user: req.user,
+      flag,
+      jti: req.decoded.jti,
+      iat: req.decoded.iat,
+    });
     successRes({ res, message: "Logout successfully" });
   } catch (err) {
-    errorRes({ res, message: err.message, status: err.cause?.status || 400 });
+    errorRes({
+      res,
+      message: {
+        message: err.message,
+        stack: err.stack,
+      },
+      status: err.cause?.status || 400,
+    });
   }
 });

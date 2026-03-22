@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { userModel } from "../models/user/user.model.js";
 import { findOne } from "../db/db.repo.js";
 import { ROLE } from "../enums/user.enum.js";
-
+import crypto from "crypto";
 export const generateToken = ({
   payload,
   role = ROLE.user,
@@ -11,7 +11,6 @@ export const generateToken = ({
 }) => {
   try {
     let secretKey = "";
-
     switch (tokenType) {
       case "access": {
         secretKey =
@@ -71,27 +70,36 @@ export const decodeToken = async ({ token, tokenType = "access" }) => {
   try {
     const decodedUser = jwt.decode(token);
     const payload = verifyToken({ token, role: decodeToken.role, tokenType });
+    console;
     const user = await findOne({
       model: userModel,
       filter: { _id: payload._id },
-      select: "firstName lastName email role gender picture",
+      select:
+        "firstName lastName email role gender picture credentialChangedAt",
     });
-    return user;
+    if (user.credentialChangedAt >= payload.iat * 1000) {
+      throw new Error("Invalid token (Session expired)");
+    }
+    return {
+      payload,
+      user,
+    };
   } catch (err) {
     throw new Error(err);
   }
 };
 
 export const generateTokens = ({ id, role }) => {
+  const tokenId = crypto.randomUUID();
   const accessToken = generateToken({
     payload: { _id: id, role: role },
     role: role,
-    options: { expiresIn: "30M" },
+    options: { expiresIn: "30M", jwtid: tokenId },
   });
   const refreshToken = generateToken({
     payload: { _id: id, role: role },
     role: role,
-    options: { expiresIn: "1W" },
+    options: { expiresIn: "1W", jwtid: tokenId },
     tokenType: "refresh",
   });
 

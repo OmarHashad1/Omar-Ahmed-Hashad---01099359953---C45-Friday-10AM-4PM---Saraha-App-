@@ -54,10 +54,10 @@ authRouter.post("/login", validate(loginSchema), async (req, res) => {
   }
 });
 
-authRouter.get("/refresh-token", (req, res) => {
+authRouter.get("/refresh-token", async (req, res) => {
   try {
     const { authorization: refreshToken } = req.headers;
-    const payload = authService.generateRefreshToken({ refreshToken });
+    const payload = await authService.generateRefreshToken({ refreshToken });
     successRes({
       res,
       message: "Access token generated successfully",

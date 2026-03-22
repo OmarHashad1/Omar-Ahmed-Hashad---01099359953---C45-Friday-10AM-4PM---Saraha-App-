@@ -1,5 +1,5 @@
 import joi from "joi";
-import { GENDER, PROVIDER, ROLE } from "../enums/user.enum.js";
+import { GENDER, LOGOUT_FLAG, PROVIDER, ROLE } from "../enums/user.enum.js";
 export const signupSchema = {
   body: joi.object({
     firstName: joi.string().min(3).max(30).required(),
@@ -28,3 +28,11 @@ export const loginSchema = {
   }),
 };
 
+export const logoutSchema = {
+  body: joi.object({
+    flag: joi
+      .string()
+      .valid(...Object.values(LOGOUT_FLAG))
+      .required(),
+  }),
+};

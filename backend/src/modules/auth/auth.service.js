@@ -54,27 +54,11 @@ export const login = async ({ email, password }) => {
   )
     throw new Error("Invalid Credentials");
 
-  const accessToken = generateToken({
-    payload: { _id: user._id, role: user.role },
-    role: user.role,
-    options: { expiresIn: "30M" },
-  });
-
-  const refreshToken = generateToken({
-    payload: { _id: user._id, role: user.role },
-    role: user.role,
-    options: { expiresIn: "1W" },
-    tokenType: "refresh",
-  });
-
-  return {
-    accessToken,
-    refreshToken,
-  };
+  return generateTokens({ id: user._id, role: user.role });
 };
 
-export const generateRefreshToken = ({ refreshToken }) => {
-  const user = decodeToken({ token: refreshToken, tokenType: "refresh" });
+export const generateRefreshToken = async ({ refreshToken }) => {
+  const user = await decodeToken({ token: refreshToken, tokenType: "refresh" });
   if (!user) throw new Error("user not found!");
   const accessToken = generateToken({
     payload: { _id: user._id },
@@ -103,7 +87,9 @@ export const googleSignUp = async ({ credential }) => {
   const existingUser = await findByEmail({ model: userModel, email });
 
   if (existingUser?.provider === PROVIDER.system)
-    throw new Error("This account uses Saraha login. Use the login form instead.");
+    throw new Error(
+      "This account uses Saraha login. Use the login form instead.",
+    );
 
   const user =
     existingUser ??

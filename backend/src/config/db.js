@@ -10,3 +10,4 @@ export const DBConnection = async () => {
     throw new Error(err);
   }
 };
+

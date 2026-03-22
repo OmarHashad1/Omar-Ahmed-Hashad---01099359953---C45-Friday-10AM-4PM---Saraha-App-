@@ -1,3 +1,4 @@
+
 export const findOne = async ({ model, filter, select = {}, options = {} }) => {
   const query = await model.findOne(filter).select(select);
   if (options.lean) query.lean();
@@ -27,3 +28,5 @@ export const create = async ({ model, data, options = {} }) => {
   const user = await model.create(Array.isArray(data) ? data : [data], options);
   return Array.isArray(data) ? user : user[0];
 };
+
+
